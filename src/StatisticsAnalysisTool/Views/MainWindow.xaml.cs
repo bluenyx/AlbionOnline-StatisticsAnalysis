@@ -1,4 +1,5 @@
 ﻿using log4net;
+using Microsoft.Extensions.DependencyInjection;
 using StatisticsAnalysisTool.Common;
 using StatisticsAnalysisTool.Common.UserSettings;
 using StatisticsAnalysisTool.Network.Manager;
@@ -8,6 +9,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Forms.Design;
 using System.Windows.Input;
 
 namespace StatisticsAnalysisTool.Views;
@@ -22,10 +24,10 @@ public partial class MainWindow
     private readonly MainWindowViewModel _mainWindowViewModel;
     private static bool _isWindowMaximized;
 
-    public MainWindow(MainWindowViewModel mainWindowViewModel)
+    public MainWindow(IServiceProvider serviceProvider)
     {
         InitializeComponent();
-        _mainWindowViewModel = mainWindowViewModel;
+        _mainWindowViewModel = serviceProvider.GetRequiredService<MainWindowViewModel>();
         DataContext = _mainWindowViewModel;
 
         _ = SettingsController.SetMainWindowSettings();

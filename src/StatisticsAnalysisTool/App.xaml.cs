@@ -8,10 +8,12 @@ using StatisticsAnalysisTool.Notification;
 using StatisticsAnalysisTool.ViewModels;
 using StatisticsAnalysisTool.Views;
 using System;
+using System.ComponentModel;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Threading;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace StatisticsAnalysisTool;
 
@@ -24,23 +26,45 @@ public partial class App
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        
+        var services = new ServiceCollection();
+        
+        ConfigureServices(services);
 
-        log4net.Config.XmlConfigurator.Configure();
-        Log.InfoFormat(LanguageController.CurrentCultureInfo, $"Tool started with v{Assembly.GetExecutingAssembly().GetName().Version}");
+        // Erstelle den Dienstanbieter
+        var serviceProvider = services.BuildServiceProvider();
 
-        AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
-
-        SettingsController.LoadSettings();
-        InitializeLanguage();
-
-        AutoUpdateController.RemoveUpdateFiles();
-        AutoUpdateController.AutoUpdate();
-
-        RegisterServices();
-
-        var mainWindow = new MainWindow(_mainWindowViewModel);
+        // Erstelle das Hauptfenster deiner Anwendung und übergebe den Dienstanbieter
+        var mainWindow = new MainWindow(serviceProvider);
         mainWindow.Show();
-        _mainWindowViewModel.InitMainWindowData();
+
+
+        //////////////////////////////////////
+
+        //base.OnStartup(e);
+
+        //log4net.Config.XmlConfigurator.Configure();
+        //Log.InfoFormat(LanguageController.CurrentCultureInfo, $"Tool started with v{Assembly.GetExecutingAssembly().GetName().Version}");
+
+        //AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
+
+        //SettingsController.LoadSettings();
+        //InitializeLanguage();
+
+        //AutoUpdateController.RemoveUpdateFiles();
+        //AutoUpdateController.AutoUpdate();
+
+        //RegisterServices();
+
+        //var mainWindow = new MainWindow(_mainWindowViewModel);
+        //mainWindow.Show();
+        //_mainWindowViewModel.InitMainWindowData();
+    }
+
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddSingleton<MainWindowViewModel, MainWindowViewModel>();
+        services.AddSingleton<ISatNotificationManager, SatNotificationManager>();
     }
 
     private void RegisterServices()
